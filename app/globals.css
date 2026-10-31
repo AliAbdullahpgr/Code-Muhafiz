@@ -506,6 +506,13 @@ select.input {
   letter-spacing: 0.4px;
   text-transform: uppercase;
 }
+.hero h1 { max-width: 880px; margin: 20px auto 0; text-wrap: balance; text-align: center; }
+.brand-text {
+  background: linear-gradient(90deg, var(--heat-100), #ff9a3d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 .hero .lede { max-width: 560px; margin: 16px auto 0; color: var(--alpha-64); text-wrap: balance; }
 
 .scan-card {

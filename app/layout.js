@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Code-Muhafiz",
+  title: "Code Muhafiz",
   description: "Gemma 4 reads your dependencies so you don't have to.",
 };
 

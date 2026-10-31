@@ -124,7 +124,7 @@ export default function Home() {
             <section className="hero">
               <div className="container hero-inner">
                 <span className="eyebrow">Dependency Trap Guard</span>
-                <h1 className="sr-only">Code-Muhafiz</h1>
+                <h1 className="t-h1">Catch <span className="brand-text">poisoned packages</span> before they&nbsp;ship</h1>
                 <p className="lede t-body-l">Find poisoned packages and get every risk explained in plain language.</p>
                 {phase === "scanning" ? (
                   <ScanProgress target={target} />
@@ -169,7 +169,7 @@ export default function Home() {
 
         <footer className="footer">
           <div className="container spread spread-sm t-body-s">
-            <span>Code-Muhafiz · Hacktoberfest 2026 · Challenge 2</span>
+            <span>Code Muhafiz · Hacktoberfest 2026 · Challenge 2</span>
             <span>MIT License</span>
           </div>
         </footer>

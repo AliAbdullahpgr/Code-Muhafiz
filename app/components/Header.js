@@ -33,9 +33,9 @@ export default function Header({ view, onView, health, theme, onTheme }) {
   return (
     <header className="header">
       <div className="container header-inner">
-        <button type="button" className="brand" onClick={() => onView("scan", true)} aria-label="Code-Muhafiz home">
+        <button type="button" className="brand" onClick={() => onView("scan", true)} aria-label="Code Muhafiz home">
           <Logo />
-          <span>Code-Muhafiz</span>
+          <span>Code Muhafiz</span>
         </button>
 
         <nav className="nav" aria-label="Primary">
