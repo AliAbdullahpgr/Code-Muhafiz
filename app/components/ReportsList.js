@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { listReports } from "../lib/api";
-import { IconAlert } from "./Icons";
+import { loadLocalReports } from "../lib/history";
 import { SEV_LABEL, formatDate, plural, timeAgo } from "../lib/format";
 
 export default function ReportsList({ onOpen, onNewScan }) {
   const [reports, setReports] = useState(null);
-  const [error, setError] = useState("");
 
   useEffect(() => {
+    const local = loadLocalReports();
     listReports()
-      .then((r) => setReports([...r].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))))
-      .catch((e) => setError(`Could not load reports. ${e.message}`));
+      .catch(() => [])
+      .then((server) => {
+        const byId = new Map(local.map((r) => [r.scanId, r]));
+        for (const r of server) byId.set(r.scanId, r);
+        setReports([...byId.values()].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      });
   }, []);
 
   return (
@@ -22,14 +26,7 @@ export default function ReportsList({ onOpen, onNewScan }) {
         <button type="button" className="btn btn-secondary" onClick={onNewScan}>New Scan</button>
       </div>
 
-      {error && (
-        <div className="callout callout-error" role="alert">
-          <IconAlert />
-          <div>{error}</div>
-        </div>
-      )}
-
-      {!reports && !error && <div className="skeleton" style={{ height: 160 }} />}
+      {!reports && <div className="skeleton" style={{ height: 160 }} />}
 
       {reports && !reports.length && (
         <div className="card empty">

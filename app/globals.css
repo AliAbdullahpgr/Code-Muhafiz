@@ -234,7 +234,8 @@ a:hover {
 }
 
 .section {
-  padding: 32px 0 64px;
+  padding-top: 32px;
+  padding-bottom: 64px;
 }
 
 .section-head {

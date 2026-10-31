@@ -9,6 +9,7 @@ import ReportsList from "./components/ReportsList";
 import AgentPanel from "./components/AgentPanel";
 import AsciiFlame from "./components/AsciiFlame";
 import Toasts from "./components/Toasts";
+import { saveLocalReport, findLocalReport } from "./lib/history";
 import { health as fetchHealth, scanGithub, scanUpload, getReport, getSummary, onFallback } from "./lib/api";
 
 const FEATURES = [
@@ -33,6 +34,10 @@ export default function Home() {
     fetchHealth().then(setHealth);
     return onFallback(() => setHealth((h) => (h && !h.mock ? { ...h, partial: true } : h)));
   }, []);
+
+  useEffect(() => {
+    if (report && report.ai?.mode !== "pending") saveLocalReport(report);
+  }, [report]);
 
   const toast = useCallback((text) => {
     const id = Math.random();
@@ -97,7 +102,7 @@ export default function Home() {
 
   async function openReport(scanId) {
     try {
-      setReport(await getReport(scanId));
+      setReport(findLocalReport(scanId) || (await getReport(scanId)));
       setView("scan");
       window.scrollTo({ top: 0 });
     } catch (e) {
