@@ -101,9 +101,13 @@ export default function Home() {
 
   async function openReport(scanId) {
     try {
-      setReport(findLocalReport(scanId) || (await getReport(scanId)));
+      // Server copy first: the local one may be stale (e.g. saved before Gemma's summary arrived).
+      const r = await getReport(scanId).catch(() => findLocalReport(scanId));
+      if (!r) throw new Error("Report not found");
+      setReport(r);
       setView("scan");
       window.scrollTo({ top: 0 });
+      if (r.ai?.mode === "pending") loadSummary(r.scanId);
     } catch (e) {
       toast("Could not open report");
     }
