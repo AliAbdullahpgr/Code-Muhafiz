@@ -1,0 +1,13 @@
+Code-Muhafiz - demo repos to scan (paste into the Repository box)
+
+https://github.com/snyk-labs/nodejs-goof
+  Deliberately vulnerable Node app - many known vulnerable packages. Best demo.
+
+https://github.com/juice-shop/juice-shop
+  OWASP's deliberately insecure app - large dependency tree.
+
+https://github.com/AliAbdullahpgr/Code-Muhafiz/tree/demo-stable
+  This repo - test/fixtures/trap-app has a typosquat, malicious package, curl | sh postinstall and obfuscated eval.
+
+https://github.com/expressjs/express
+  Healthy repo for contrast (risk 34 Medium, 3 findings when tested).
