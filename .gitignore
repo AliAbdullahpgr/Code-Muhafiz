@@ -8,3 +8,5 @@ AGENTS.md
 /data/reports/
 /.keys/
 /data/ledger.json
+.vercel
+.env*
