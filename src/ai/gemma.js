@@ -36,10 +36,11 @@ export async function explainFinding(finding) {
 
 // ---------- model calls ----------
 
+// Both models race in parallel (Gemma is often overloaded); the first non-empty answer wins.
 async function generateWithFallback(prompt) {
   if (!config.gemini.apiKey) return null;
   const models = [...new Set([config.gemini.model, config.gemini.fallbackModel].filter(Boolean))];
-  for (const model of models) {
+  const attempts = models.map(async (model) => {
     try {
       const text = await callModel(model, prompt);
       if (text) return { model, text };
@@ -47,8 +48,13 @@ async function generateWithFallback(prompt) {
     } catch (err) {
       console.warn(`[gemma] ${model} failed: ${err?.message || err}`);
     }
+    throw new Error(`${model} gave no answer`);
+  });
+  try {
+    return await Promise.any(attempts);
+  } catch {
+    return null;
   }
-  return null;
 }
 
 async function callModel(model, prompt) {
@@ -65,7 +71,7 @@ async function callModel(model, prompt) {
     const request = getClient().models.generateContent({
       model,
       contents: prompt,
-      config: { temperature: 0.3, maxOutputTokens: 2048, abortSignal: controller.signal },
+      config: { temperature: 0.3, maxOutputTokens: 8192, abortSignal: controller.signal },
     });
     const response = await Promise.race([request, timeout]);
     return cleanText(extractText(response));

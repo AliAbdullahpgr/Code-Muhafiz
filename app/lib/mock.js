@@ -165,6 +165,11 @@ export async function mockRequest(path, opts = {}) {
     return r;
   }
 
+  if (path === "/api/summary") {
+    await sleep(1500);
+    return { mode: "fallback", model: "template", summary: makeReport("x").ai.summary };
+  }
+
   if (path === "/api/explain") {
     const r = store.get(body.scanId);
     const f = r?.findings.find((x) => x.id === body.findingId);

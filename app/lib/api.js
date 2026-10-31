@@ -53,6 +53,7 @@ export async function health() {
 
 export const scanGithub = (repo, branch) => post("/api/scan/github", branch ? { repo, branch } : { repo });
 export const scanUpload = (name, files) => post("/api/scan/upload", { name, files });
+export const getSummary = (scanId) => post("/api/summary", { scanId });
 export const explain = (scanId, findingId) => post("/api/explain", { scanId, findingId });
 export const recordProof = (scanId) => post(`/api/proofs/${scanId}`);
 export const verifyProof = (scanId) => request(`/api/proofs/${scanId}/verify`);

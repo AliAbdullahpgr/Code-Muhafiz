@@ -9,7 +9,7 @@ import ReportsList from "./components/ReportsList";
 import AgentPanel from "./components/AgentPanel";
 import AsciiFlame from "./components/AsciiFlame";
 import Toasts from "./components/Toasts";
-import { health as fetchHealth, scanGithub, scanUpload, getReport, onFallback } from "./lib/api";
+import { health as fetchHealth, scanGithub, scanUpload, getReport, getSummary, onFallback } from "./lib/api";
 
 const FEATURES = [
   ["Ingest", "Point it at a public repo or drop a folder. Lockfiles and node_modules give us the deep dependencies."],
@@ -60,6 +60,18 @@ export default function Home() {
     window.scrollTo({ top: 0 });
   }
 
+  // The API returns findings first; Gemma's summary arrives from a second call.
+  async function loadSummary(scanId) {
+    setReport((r) => (r?.scanId === scanId ? { ...r, ai: { mode: "pending", model: null, summary: "" } } : r));
+    let ai;
+    try {
+      ai = await getSummary(scanId);
+    } catch (e) {
+      ai = { mode: "error", model: null, summary: `Could not write the summary. ${e.message}` };
+    }
+    setReport((r) => (r?.scanId === scanId ? { ...r, ai } : r));
+  }
+
   async function runScan(label, call) {
     setError("");
     setTarget(label);
@@ -68,6 +80,7 @@ export default function Home() {
       const r = await call();
       setReport(r);
       toast("Scan complete");
+      if (r.ai?.mode === "pending") loadSummary(r.scanId);
     } catch (e) {
       setError(`Scan failed. ${e.message}`);
     } finally {
@@ -137,6 +150,7 @@ export default function Home() {
               report={report}
               onReport={setReport}
               onNewScan={() => goTo("scan", true)}
+              onRetrySummary={() => loadSummary(report.scanId)}
               toast={toast}
             />
           </section>

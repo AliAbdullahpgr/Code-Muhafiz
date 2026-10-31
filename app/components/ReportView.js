@@ -53,8 +53,27 @@ function ScoreCard({ summary }) {
   );
 }
 
-function Summary({ ai }) {
+function Summary({ ai, onRetry }) {
   const [open, setOpen] = useState(false);
+  if (!ai || ai.mode === "pending") {
+    return (
+      <div className="stack-3" role="status" aria-live="polite">
+        <p className="row t-body-m"><span className="spinner spinner-sm" /> Gemma 4 is writing the explanation…</p>
+        <p className="t-body-s muted">This can take up to a minute. Your findings are ready below.</p>
+        <div className="skeleton" style={{ height: 14, width: "92%" }} />
+        <div className="skeleton" style={{ height: 14, width: "78%" }} />
+        <div className="skeleton" style={{ height: 14, width: "85%" }} />
+      </div>
+    );
+  }
+  if (ai.mode === "error") {
+    return (
+      <div className="stack-3">
+        <p className="field-error" role="alert">{ai.summary}</p>
+        <button type="button" className="btn btn-secondary btn-sm" onClick={onRetry}>Retry Summary</button>
+      </div>
+    );
+  }
   const long = (ai?.summary || "").length > 900;
   return (
     <>
@@ -79,7 +98,7 @@ function Stat({ label, value }) {
   );
 }
 
-export default function ReportView({ report, onReport, onNewScan, toast }) {
+export default function ReportView({ report, onReport, onNewScan, onRetrySummary, toast }) {
   const [tab, setTab] = useState("findings");
   const { stats = {}, ai, warnings = [] } = report;
   const ecosystems = Object.entries(stats.ecosystems || {}).map(([k, v]) => `${k} ${v}`).join(" · ");
@@ -122,9 +141,9 @@ export default function ReportView({ report, onReport, onNewScan, toast }) {
         <div className="card">
           <div className="spread card-title">
             <p className="t-label-s muted">Summary</p>
-            {ai && <span className={`badge ${ai.mode === "gemma" ? "badge-heat" : "badge-outline"}`}>{ai.mode === "gemma" ? `Gemma 4 · ${ai.model}` : "Template Summary"}</span>}
+            {ai && (ai.mode === "gemma" || ai.mode === "fallback") && <span className={`badge ${ai.mode === "gemma" ? "badge-heat" : "badge-outline"}`}>{ai.mode === "gemma" ? `Gemma 4 · ${ai.model}` : "Template Summary"}</span>}
           </div>
-          {ai?.summary ? <Summary ai={ai} /> : <p className="muted">No summary was generated for this scan.</p>}
+          <Summary ai={ai} onRetry={onRetrySummary} />
         </div>
       </div>
 

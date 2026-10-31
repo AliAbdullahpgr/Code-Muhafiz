@@ -7,8 +7,7 @@ const STEPS = [
   ["Ingesting Files…", "Reading manifests and source text"],
   ["Parsing Dependencies…", "Direct and transitive, from lockfiles"],
   ["Detecting Risks…", "OSV.dev, threat intel, typosquats, install scripts, code patterns"],
-  ["Explaining With Gemma…", "Writing a plain-language summary"],
-  ["Recording Proof…", "Hashing the report and signing it as the agent"],
+  ["Scoring Report…", "Hashing the findings so the audit can be verified"],
 ];
 
 // The scan API is a single request, so these stages are paced client-side.
@@ -52,7 +51,7 @@ export default function ScanProgress({ target }) {
         })}
       </ol>
       {slow && (
-        <p className="t-body-s muted">This is taking longer than usual. Gemma may be slow, and the scan falls back to a template summary if it times out.</p>
+        <p className="t-body-s muted">This is taking longer than usual. Large folders and slow OSV lookups can add a minute.</p>
       )}
     </div>
   );

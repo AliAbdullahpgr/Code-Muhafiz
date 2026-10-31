@@ -3,6 +3,6 @@
 .next/
 next-env.d.ts
 !test/fixtures/**/node_modules/
-
 .playwright-mcp/
 AGENTS.md
+/data/reports/

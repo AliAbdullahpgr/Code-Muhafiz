@@ -62,9 +62,14 @@ export async function scan(input, { offline = false, ai = true } = {}) {
     proof: null,
   };
 
-  report.ai = ai
-    ? await summarizeReport(report)
-    : { mode: 'fallback', model: 'disabled', summary: '' };
+  // AI text is excluded from the hash, so the summary can be filled in later (see addAiSummary).
+  report.ai = ai ? await summarizeReport(report) : { mode: 'pending', model: null, summary: '' };
   report.reportHash = hashReport(report);
+  return report;
+}
+
+// Gemma takes 30–100 s under load, so the API returns findings first and summarizes in a second call.
+export async function addAiSummary(report) {
+  report.ai = await summarizeReport(report);
   return report;
 }
