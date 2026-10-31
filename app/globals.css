@@ -483,9 +483,10 @@ select.input {
 .hero {
   position: relative;
   overflow: hidden;
-  padding: 64px 0 0;
+  padding: 56px 0 0;
   background:
-    radial-gradient(60% 50% at 50% 100%, var(--heat-8), transparent 70%),
+    radial-gradient(50% 45% at 50% 0%, var(--heat-12), transparent 70%),
+    radial-gradient(70% 55% at 50% 100%, var(--heat-16), transparent 70%),
     var(--background-base);
 }
 .hero-inner { position: relative; z-index: 1; text-align: center; padding-bottom: 32px; }
@@ -496,31 +497,31 @@ select.input {
   height: 28px;
   padding: 0 12px;
   border-radius: var(--r-full);
-  background: var(--heat-8);
+  background: linear-gradient(180deg, var(--heat-12), var(--heat-4));
   color: var(--heat-100);
-  box-shadow: inset 0 0 0 1px var(--heat-16);
+  box-shadow: inset 0 0 0 1px var(--heat-20), 0 2px 12px var(--heat-12);
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 16px;
   letter-spacing: 0.4px;
   text-transform: uppercase;
 }
-.hero h1 { max-width: 840px; margin: 20px auto 0; text-wrap: balance; }
-.hero .lede { max-width: 620px; margin: 16px auto 0; color: var(--alpha-64); text-wrap: balance; }
+.hero .lede { max-width: 560px; margin: 16px auto 0; color: var(--alpha-64); text-wrap: balance; }
 
 .scan-card {
   max-width: 720px;
-  margin: 40px auto 0;
+  margin: 28px auto 0;
   text-align: left;
   padding: 16px;
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-pop);
+  border-color: var(--heat-20);
+  box-shadow: var(--shadow-pop), 0 0 0 4px var(--heat-4), 0 12px 48px var(--heat-12);
 }
 
 .flame {
   position: relative;
-  height: 160px;
-  margin-top: -64px;
+  height: 140px;
+  margin-top: -56px;
   pointer-events: none;
   user-select: none;
   -webkit-mask-image: linear-gradient(to top, #000 30%, transparent);
@@ -536,10 +537,17 @@ select.input {
   line-height: 12px;
   letter-spacing: 0;
   color: var(--heat-100);
+  background: linear-gradient(to top, var(--heat-100) 0%, #ff8a3d 45%, #ffb347 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   white-space: pre;
   overflow: hidden;
 }
 
+.feature { transition: var(--transition); }
+.feature:hover { border-color: var(--heat-40); box-shadow: 0 4px 24px var(--heat-8); }
+.feature .num { color: var(--heat-100); }
 .features {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

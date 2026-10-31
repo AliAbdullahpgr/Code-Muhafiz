@@ -120,10 +120,8 @@ export default function Home() {
             <section className="hero">
               <div className="container hero-inner">
                 <span className="eyebrow">Dependency Trap Guard</span>
-                <h1 className="t-h1">Gemma 4 reads your dependencies so you don’t have to</h1>
-                <p className="lede t-body-xl">
-                  Scan a repo for poisoned packages, get every risk explained in plain language, and fingerprint every audit so it can be checked later.
-                </p>
+                <h1 className="sr-only">Code-Muhafiz</h1>
+                <p className="lede t-body-l">Find poisoned packages and get every risk explained in plain language.</p>
                 {phase === "scanning" ? (
                   <ScanProgress target={target} />
                 ) : (
@@ -137,7 +135,7 @@ export default function Home() {
               <div className="features">
                 {FEATURES.map(([title, body], i) => (
                   <div key={title} className="card card-compact feature">
-                    <span className="mono faint t-mono-xs">0{i + 1}</span>
+                    <span className="mono num t-mono-xs">0{i + 1}</span>
                     <h2 className="t-label-l" style={{ marginTop: 8 }}>{title}</h2>
                     <p className="t-body-s muted" style={{ marginTop: 4 }}>{body}</p>
                   </div>
