@@ -4,6 +4,8 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { config } from '../config.js';
+import { kv, kvEnabled } from '../kv.js';
 import { hashReport } from '../scanner.js';
 import { encode as b58encode, decode as b58decode } from './base58.js';
 
@@ -11,8 +13,33 @@ const GENESIS = '0'.repeat(64);
 const PROTOCOL = 'code-muhafiz';
 
 // Read env per call so tests (and future config) can redirect storage.
-const keypairPath = () => path.resolve(process.env.SOLANA_KEYPAIR || '.keys/agent.json');
-const ledgerPath = () => path.resolve(process.env.LEDGER_PATH || path.join('data', 'ledger.json'));
+// Key source order: AGENT_KEYPAIR env (JSON array, Solana CLI format) → Redis → file.
+const keypairPath = () => path.resolve(process.env.SOLANA_KEYPAIR || path.join(config.dataDir, '..', '.keys', 'agent.json'));
+const ledgerPath = () => path.resolve(process.env.LEDGER_PATH || path.join(config.dataDir, 'ledger.json'));
+
+function generateKeypairBytes() {
+  const { privateKey } = crypto.generateKeyPairSync('ed25519');
+  const jwk = privateKey.export({ format: 'jwk' });
+  return Uint8Array.from([...Buffer.from(jwk.d, 'base64url'), ...Buffer.from(jwk.x, 'base64url')]);
+}
+
+async function readKeypairBytes(file) {
+  if (process.env.AGENT_KEYPAIR) return Uint8Array.from(JSON.parse(process.env.AGENT_KEYPAIR));
+  if (kvEnabled()) {
+    // SET NX: the first instance to boot creates the identity; every instance after reuses it.
+    await kv('SET', 'agent:keypair', JSON.stringify([...generateKeypairBytes()]), 'NX');
+    return Uint8Array.from(JSON.parse(await kv('GET', 'agent:keypair')));
+  }
+  try {
+    return Uint8Array.from(JSON.parse(await fs.readFile(file, 'utf8')));
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+    const bytes = generateKeypairBytes();
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.writeFile(file, JSON.stringify([...bytes]), { mode: 0o600 });
+    return bytes;
+  }
+}
 
 const b64u = (buf) => Buffer.from(buf).toString('base64url');
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
@@ -24,18 +51,8 @@ let cached = null; // { path, privateKey, publicKey (KeyObject), pubkeyBytes, ad
 async function loadKeypair() {
   const file = keypairPath();
   if (cached?.path === file) return cached;
-  let bytes;
-  try {
-    bytes = Uint8Array.from(JSON.parse(await fs.readFile(file, 'utf8')));
-    if (bytes.length !== 64) throw new Error(`Keypair at ${file} must be 64 bytes`);
-  } catch (e) {
-    if (e.code !== 'ENOENT') throw e;
-    const { privateKey } = crypto.generateKeyPairSync('ed25519');
-    const jwk = privateKey.export({ format: 'jwk' });
-    bytes = Uint8Array.from([...Buffer.from(jwk.d, 'base64url'), ...Buffer.from(jwk.x, 'base64url')]);
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.writeFile(file, JSON.stringify([...bytes]), { mode: 0o600 });
-  }
+  const bytes = await readKeypairBytes(file);
+  if (bytes.length !== 64) throw new Error('Agent keypair must be 64 bytes');
   const seed = bytes.subarray(0, 32);
   const pub = bytes.subarray(32, 64);
   const privateKey = crypto.createPrivateKey({ key: { kty: 'OKP', crv: 'Ed25519', d: b64u(seed), x: b64u(pub) }, format: 'jwk' });
@@ -50,6 +67,7 @@ function publicKeyFromAddress(address) {
 // ---- ledger ------------------------------------------------------------------------------
 
 async function readLedger() {
+  if (kvEnabled()) return ((await kv('LRANGE', 'ledger', 0, -1)) || []).map((s) => JSON.parse(s));
   try {
     const data = JSON.parse(await fs.readFile(ledgerPath(), 'utf8'));
     return Array.isArray(data) ? data : data.entries || [];
@@ -61,10 +79,19 @@ async function readLedger() {
 
 async function appendMemo(memo) {
   const kp = await loadKeypair();
-  const entries = await readLedger();
-  const prevHash = entries.length ? entries[entries.length - 1].entryHash : GENESIS;
   const signature = b58encode(crypto.sign(null, Buffer.from(memo, 'utf8'), kp.privateKey));
-  const entry = { signature, memo, timestamp: new Date().toISOString(), prevHash, entryHash: sha256(prevHash + signature), signer: kp.address };
+  const makeEntry = (prevHash) =>
+    ({ signature, memo, timestamp: new Date().toISOString(), prevHash, entryHash: sha256(prevHash + signature), signer: kp.address });
+
+  if (kvEnabled()) {
+    const last = await kv('LINDEX', 'ledger', -1);
+    const entry = makeEntry(last ? JSON.parse(last).entryHash : GENESIS);
+    await kv('RPUSH', 'ledger', JSON.stringify(entry));
+    return entry;
+  }
+
+  const entries = await readLedger();
+  const entry = makeEntry(entries.length ? entries[entries.length - 1].entryHash : GENESIS);
   entries.push(entry);
   await fs.mkdir(path.dirname(ledgerPath()), { recursive: true });
   await fs.writeFile(ledgerPath(), JSON.stringify(entries, null, 2));
