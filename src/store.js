@@ -11,6 +11,21 @@ export async function saveReport(report) {
   return report;
 }
 
+// Newest first, without the heavy fields (dependencies, findings, AI text).
+export async function listReports() {
+  let names = [];
+  try {
+    names = (await fs.readdir(REPORTS_DIR)).filter((n) => n.endsWith('.json'));
+  } catch {
+    return [];
+  }
+  const reports = await Promise.all(names.map((n) => loadReport(n.slice(0, -5))));
+  return reports
+    .filter(Boolean)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(({ dependencies: _d, findings: _f, ai: _a, ...rest }) => rest);
+}
+
 export async function loadReport(scanId) {
   if (!SCAN_ID_RE.test(String(scanId))) return null;
   try {
