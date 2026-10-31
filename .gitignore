@@ -6,3 +6,5 @@ next-env.d.ts
 .playwright-mcp/
 AGENTS.md
 /data/reports/
+/.keys/
+/data/ledger.json
