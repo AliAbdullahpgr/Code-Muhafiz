@@ -53,6 +53,23 @@ function ScoreCard({ summary }) {
   );
 }
 
+function Summary({ ai }) {
+  const [open, setOpen] = useState(false);
+  const long = (ai?.summary || "").length > 900;
+  return (
+    <>
+      <div className="collapsible" data-open={open || !long}>
+        <Markdown>{ai.summary}</Markdown>
+      </div>
+      {long && (
+        <button type="button" className="btn btn-tertiary btn-sm" style={{ marginTop: 8 }} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+          {open ? "Show Less" : "Show Full Summary"}
+        </button>
+      )}
+    </>
+  );
+}
+
 function Stat({ label, value }) {
   return (
     <div className="stat">
@@ -107,7 +124,7 @@ export default function ReportView({ report, onReport, onNewScan, toast }) {
             <p className="t-label-s muted">Summary</p>
             {ai && <span className={`badge ${ai.mode === "gemma" ? "badge-heat" : "badge-outline"}`}>{ai.mode === "gemma" ? `Gemma 4 · ${ai.model}` : "Template Summary"}</span>}
           </div>
-          {ai?.summary ? <Markdown>{ai.summary}</Markdown> : <p className="muted">No summary was generated for this scan.</p>}
+          {ai?.summary ? <Summary ai={ai} /> : <p className="muted">No summary was generated for this scan.</p>}
         </div>
       </div>
 

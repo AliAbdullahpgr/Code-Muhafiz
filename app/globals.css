@@ -772,6 +772,13 @@ select.input {
 .prose pre code { padding: 0; background: none; }
 .prose strong { font-weight: 500; }
 
+.collapsible[data-open="false"] {
+  max-height: 280px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(#000 70%, transparent);
+  mask-image: linear-gradient(#000 70%, transparent);
+}
+
 /* ───────── Findings ───────── */
 
 .toolbar {
