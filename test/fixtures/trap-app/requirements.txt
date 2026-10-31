@@ -1,0 +1,4 @@
+# TEST FIXTURE requirements
+requests==2.19.0
+reqeusts==1.0.0
+flask>=2.0

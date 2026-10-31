@@ -1,0 +1,16 @@
+{
+  "name": "trap-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TEST FIXTURE for Code-Muhafiz: a mock repo with planted supply-chain traps. Never install or run.",
+  "scripts": {
+    "start": "node src/telemetry.js",
+    "test": "echo \"no tests\""
+  },
+  "dependencies": {
+    "lodash": "4.17.15",
+    "event-stream": "3.3.6",
+    "crossenv": "^6.1.1",
+    "express": "^4.18.2"
+  }
+}
