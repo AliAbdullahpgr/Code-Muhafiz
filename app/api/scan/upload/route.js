@@ -1,9 +1,10 @@
 import { scan } from '../../../../src/scanner.js';
+import { saveReport } from '../../../../src/store.js';
 
 export const runtime = 'nodejs';
-export const maxDuration = 120;
+export const maxDuration = 60;
 
-// POST { name, files: [{ path, content }] } → Report
+// POST { name, files: [{ path, content }] } → Report (ai.mode 'pending'; call POST /api/summary next)
 export async function POST(request) {
   let body;
   try {
@@ -15,7 +16,11 @@ export async function POST(request) {
     return Response.json({ error: 'files[] is required' }, { status: 400 });
   }
   try {
-    const report = await scan({ source: 'upload', target: `upload:${body.name || 'project'}`, files: body.files });
+    const report = await scan(
+      { source: 'upload', target: `upload:${body.name || 'project'}`, files: body.files },
+      { ai: false },
+    );
+    await saveReport(report);
     return Response.json(report);
   } catch (err) {
     console.error('scan failed:', err);
