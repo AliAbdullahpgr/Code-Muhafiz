@@ -5,6 +5,7 @@ import { Logo, IconSun, IconMoon } from "./Icons";
 const VIEWS = [
   ["scan", "Scan"],
   ["reports", "Reports"],
+  ["agent", "Agent"],
 ];
 
 export function StatusPills({ health }) {

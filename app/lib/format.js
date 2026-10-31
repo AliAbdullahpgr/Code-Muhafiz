@@ -43,3 +43,11 @@ export function formatBytes(n) {
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
+
+export function explorerTx(sig) {
+  return `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
+}
+
+export function explorerAddress(addr) {
+  return `https://explorer.solana.com/address/${addr}?cluster=devnet`;
+}

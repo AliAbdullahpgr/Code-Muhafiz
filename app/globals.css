@@ -936,7 +936,12 @@ table.table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .table tbody tr:hover td { background: var(--alpha-2); }
 .table td.mono, .table td .mono { font-family: var(--font-mono); font-size: 13px; }
 
-/* ───────── Status, lists, empty states ───────── */
+/* ───────── Agent, status, lists, empty states ───────── */
+
+.kv { display: grid; grid-template-columns: 140px 1fr; gap: 12px 16px; align-items: start; }
+.kv dt { color: var(--alpha-64); font-size: 13px; padding-top: 2px; }
+.kv dd { margin: 0; min-width: 0; font-size: 13px; }
+
 
 .kv { display: grid; grid-template-columns: 140px 1fr; gap: 12px 16px; align-items: start; }
 .kv dt { color: var(--alpha-64); font-size: 13px; padding-top: 2px; }
@@ -1056,8 +1061,8 @@ button.list-item:hover { background: var(--alpha-2); }
   .form-grid .btn { width: 100%; }
   .hide-md { display: none !important; }
   .counts { grid-template-columns: repeat(2, 1fr); }
-  .meta { grid-template-columns: 1fr; gap: 4px; }
-  .meta dd { margin-bottom: 8px; }
+  .kv, .meta { grid-template-columns: 1fr; gap: 4px; }
+  .kv dd, .meta dd { margin-bottom: 8px; }
   .card { padding: 16px; }
   .list-item { padding: 16px; }
   .flame pre { font-size: 10px; line-height: 10px; }

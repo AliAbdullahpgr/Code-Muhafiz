@@ -3,6 +3,10 @@
 
 const HASH = "9f2c1ad04b7e5d38c6a10f4e2b9d7a53e8c01b46f7d2a9e53c18b0a4d6e7f291";
 
+const AGENT = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU";
+const SIG = "5VERv8NMvzbJMEkV8xnrLkEaWRtSFPJTZ6Qv1ZkY2gZ9uQy3sDkX7mJ1bq4L8hT2cN6wRzP9eYf3aUoKxMdHnS4";
+let agentRegistered = false;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const findings = [
@@ -167,6 +171,14 @@ export async function mockRequest(path, opts = {}) {
     const r = store.get(body.scanId);
     const f = r?.findings.find((x) => x.id === body.findingId);
     return { explanation: explanations[body.findingId] || (f ? genericExplanation(f) : "### Demo explanation\n\n`/api/explain` is not live yet. When it is, Gemma 4 will explain this finding here."), mode: "fallback" };
+  }
+
+  if (path === "/api/agent" || path === "/api/agent/register") {
+    if (path.endsWith("register")) agentRegistered = true;
+    return { publicKey: AGENT, balance: 0, mode: "simulated", registered: agentRegistered, registrationSignature: agentRegistered ? SIG : null };
+  }
+  if (path === "/api/agent/history") {
+    return agentRegistered ? [{ signature: SIG, memo: '{"t":"agent_register","name":"code-muhafiz"}', timestamp: new Date().toISOString() }] : [];
   }
 
   throw Object.assign(new Error("Not found."), { status: 404 });

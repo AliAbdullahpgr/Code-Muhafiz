@@ -6,6 +6,7 @@ import ScanForm from "./components/ScanForm";
 import ScanProgress from "./components/ScanProgress";
 import ReportView from "./components/ReportView";
 import ReportsList from "./components/ReportsList";
+import AgentPanel from "./components/AgentPanel";
 import AsciiFlame from "./components/AsciiFlame";
 import Toasts from "./components/Toasts";
 import { saveLocalReport, findLocalReport } from "./lib/history";
@@ -164,6 +165,12 @@ export default function Home() {
         {view === "reports" && (
           <section className="container section">
             <ReportsList onOpen={openReport} onNewScan={() => goTo("scan", true)} />
+          </section>
+        )}
+
+        {view === "agent" && (
+          <section className="container section">
+            <AgentPanel toast={toast} />
           </section>
         )}
 

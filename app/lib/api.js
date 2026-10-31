@@ -61,3 +61,30 @@ export async function listReports() {
   const data = await request("/api/reports");
   return Array.isArray(data) ? data : data?.reports || [];
 }
+
+export function normalizeAgent(a) {
+  if (!a) return null;
+  return {
+    publicKey: a.publicKey || a.pubkey || a.agent || a.address || "",
+    balance: a.balance ?? a.sol ?? null,
+    mode: a.mode || "simulated",
+    registered: Boolean(a.registered ?? a.registrationSignature ?? a.registration?.signature ?? a.signature),
+    registrationSignature: a.registrationSignature || a.registration?.signature || a.signature || null,
+    explorerUrl: a.explorerUrl || a.registration?.explorerUrl || null,
+  };
+}
+
+export const getAgent = async () => normalizeAgent(await request("/api/agent"));
+export const registerAgent = async () => normalizeAgent(await post("/api/agent/register"));
+
+export async function getHistory() {
+  const data = await request("/api/agent/history");
+  const rows = Array.isArray(data) ? data : data?.history || data?.records || data?.signatures || [];
+  return rows.map((r) => ({
+    signature: r.signature || r.sig || "",
+    memo: r.memo || null,
+    timestamp: r.timestamp || (r.blockTime ? new Date(r.blockTime * 1000).toISOString() : null),
+    explorerUrl: r.explorerUrl || null,
+    failed: Boolean(r.err),
+  }));
+}
