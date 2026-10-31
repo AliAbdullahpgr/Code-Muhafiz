@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { IconChevron, IconExternal, IconInfo } from "./Icons";
+import { IconChevron, IconExternal, IconInfo, IconAlert, IconCheck } from "./Icons";
 import Markdown from "./Markdown";
 import { explain } from "../lib/api";
 import { SEVERITIES, SEV_RANK, SEV_LABEL, TYPE_LABEL, SOURCE_LABEL, AI_LABEL, plural } from "../lib/format";
@@ -23,16 +23,21 @@ function Finding({ finding, scanId, open, onToggle, toast }) {
   const where = finding.file ? `${finding.file}${finding.line ? `:${finding.line}` : ""}` : null;
 
   return (
-    <li className="finding" data-sev={finding.severity}>
+    <li className="finding" data-open={open}>
       <button type="button" className="finding-head" aria-expanded={open} aria-controls={`f-${finding.id}`} onClick={onToggle}>
-        <span className={`badge badge-${finding.severity}`}>{SEV_LABEL[finding.severity]}</span>
+        <span className="sev-tile" data-sev={finding.severity} aria-hidden="true">
+          {finding.severity === "low" ? <IconInfo size={16} /> : <IconAlert size={16} />}
+        </span>
         <span className="grow">
-          <span className="t-label-m break" style={{ display: "block" }}>{finding.title}</span>
-          <span className="t-mono-xs muted break" style={{ display: "block", marginTop: 4 }}>
-            {TYPE_LABEL[finding.type] || finding.type}
-            {finding.package ? ` · ${finding.package}${finding.version ? `@${finding.version}` : ""}` : ""}
+          <span className="t-label-m break finding-title">{finding.title}</span>
+          <span className="finding-meta">
+            <span className="badge badge-outline">{TYPE_LABEL[finding.type] || finding.type}</span>
+            {finding.package && (
+              <span className="t-mono-xs muted break">{finding.package}{finding.version ? `@${finding.version}` : ""}</span>
+            )}
           </span>
         </span>
+        <span className={`badge badge-${finding.severity}`}>{SEV_LABEL[finding.severity]}</span>
         <IconChevron className="chev" />
       </button>
 
@@ -41,41 +46,44 @@ function Finding({ finding, scanId, open, onToggle, toast }) {
           <p className="t-body-m break">{finding.description}</p>
 
           {finding.evidence && (
-            <div>
-              <div className="code-head t-mono-xs">
-                <span className="break">{where || "Evidence"}</span>
-              </div>
-              <pre className="code">{finding.evidence}</pre>
+            <div className="evidence">
+              <div className="evidence-head t-mono-xs break">{where || "Evidence"}</div>
+              <pre className="evidence-code">{finding.evidence}</pre>
             </div>
           )}
 
-          <dl className="meta">
-            {finding.fix && (
-              <>
-                <dt>Fix</dt>
-                <dd className="break">{finding.fix}</dd>
-              </>
-            )}
-            <dt>Detected By</dt>
-            <dd>
-              <span className="badge badge-outline">{SOURCE_LABEL[finding.source] || finding.source}</span>
-              {finding.ruleId && <span className="t-mono-xs muted" style={{ marginLeft: 8 }}>{finding.ruleId}</span>}
-            </dd>
+          {finding.fix && (
+            <div className="fix-tile">
+              <span className="fix-ic"><IconCheck size={12} strokeWidth={2.5} /></span>
+              <div className="grow">
+                <div className="t-label-s">Recommended Fix</div>
+                <div className="t-body-m break">{finding.fix}</div>
+              </div>
+            </div>
+          )}
+
+          <div className="info-grid">
+            <div className="info-tile">
+              <div className="t-body-s muted">Detected By</div>
+              <div className="row-wrap" style={{ marginTop: 4 }}>
+                <span className="badge badge-outline">{SOURCE_LABEL[finding.source] || finding.source}</span>
+                {finding.ruleId && <span className="t-mono-xs muted break">{finding.ruleId}</span>}
+              </div>
+            </div>
             {finding.references?.length > 0 && (
-              <>
-                <dt>References</dt>
-                <dd className="stack-2">
-                  {finding.references.map((url) => (
-                    <div key={url}>
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="break row" style={{ display: "inline-flex", gap: 4 }}>
-                        {url.replace(/^https?:\/\//, "")} <IconExternal size={12} />
-                      </a>
-                    </div>
+              <div className="info-tile">
+                <div className="t-body-s muted">References</div>
+                <div className="ref-list">
+                  {finding.references.slice(0, 5).map((url) => (
+                    <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="ref-chip" title={url}>
+                      <span className="break">{url.replace(/^https?:\/\/(www\.)?/, "")}</span>
+                      <IconExternal size={12} />
+                    </a>
                   ))}
-                </dd>
-              </>
+                </div>
+              </div>
             )}
-          </dl>
+          </div>
 
           {state.status === "done" ? (
             <div className="explain stack-3">
