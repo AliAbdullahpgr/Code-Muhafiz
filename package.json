@@ -2,15 +2,17 @@
   "name": "depsentry",
   "version": "0.1.0",
   "description": "Gemma 4-powered dependency trap guard: scans your dependencies for supply-chain risks and explains them in plain language.",
-  "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "license": "MIT",
   "dependencies": {
     "@google/genai": "^2.32.0",
-    "dotenv": "^18.0.9",
-    "express": "^5.3.0"
+    "next": "^16.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   }
 }
