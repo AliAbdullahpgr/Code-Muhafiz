@@ -1,0 +1,52 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - button "Code-Muhafiz home" [ref=e4] [cursor=pointer]:
+        - generic [ref=e9]: Code-Muhafiz
+      - navigation "Primary" [ref=e10]:
+        - button "Scan" [ref=e11] [cursor=pointer]
+        - button "Reports" [ref=e12] [cursor=pointer]
+        - button "Agent" [ref=e13] [cursor=pointer]
+      - button "Switch to dark theme" [ref=e15] [cursor=pointer]
+  - main [ref=e18]:
+    - generic [ref=e20]:
+      - generic [ref=e21]: Dependency Trap Guard
+      - heading "Gemma 4 reads your dependencies so you don’t have to" [level=1] [ref=e22]
+      - paragraph [ref=e23]: Scan a repo for poisoned packages, get every risk explained in plain language, and stamp a tamper-proof audit on Solana.
+      - generic [ref=e24]:
+        - tablist "Scan source" [ref=e25]:
+          - tab "GitHub Repo" [selected] [ref=e26] [cursor=pointer]
+          - tab "Upload Folder" [ref=e29] [cursor=pointer]
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - generic [ref=e34]:
+              - generic [ref=e35]: Repository
+              - textbox "Repository" [ref=e36]:
+                - /placeholder: github.com/owner/repo
+            - generic [ref=e37]:
+              - generic [ref=e38]: Branch
+              - textbox "Branch" [ref=e39]:
+                - /placeholder: default
+            - button "Start Scan" [ref=e40] [cursor=pointer]
+          - paragraph [ref=e41]: Public repositories only. Nothing is cloned or executed. We read manifests and source text through the GitHub API.
+    - generic [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]: "01"
+        - heading "Ingest" [level=2] [ref=e46]
+        - paragraph [ref=e47]: Point it at a public repo or drop a folder. Lockfiles and node_modules give us the deep dependencies.
+      - generic [ref=e48]:
+        - generic [ref=e49]: "02"
+        - heading "Detect" [level=2] [ref=e50]
+        - paragraph [ref=e51]: OSV.dev, a Snowflake threat-intel table, typosquat checks, install scripts and suspicious code patterns.
+      - generic [ref=e52]:
+        - generic [ref=e53]: "03"
+        - heading "Explain" [level=2] [ref=e54]
+        - paragraph [ref=e55]: Gemma 4 turns raw advisories and code lines into what, why and how to fix, written for a junior dev.
+      - generic [ref=e56]:
+        - generic [ref=e57]: "04"
+        - heading "Prove" [level=2] [ref=e58]
+        - paragraph [ref=e59]: The report hash is signed by the agent and written to Solana, so any audit can be verified later.
+    - generic [ref=e61]:
+      - generic [ref=e62]: Code-Muhafiz · Hacktoberfest 2026 · Challenge 2
+      - generic [ref=e63]: MIT License
+  - status
