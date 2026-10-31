@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { IconChevron, IconExternal, IconInfo } from "./Icons";
 import Markdown from "./Markdown";
 import { explain } from "../lib/api";
-import { SEVERITIES, SEV_RANK, SEV_LABEL, TYPE_LABEL, SOURCE_LABEL, plural } from "../lib/format";
+import { SEVERITIES, SEV_RANK, SEV_LABEL, TYPE_LABEL, SOURCE_LABEL, AI_LABEL, plural } from "../lib/format";
 
 function Finding({ finding, scanId, open, onToggle, toast }) {
   const [state, setState] = useState({ status: "idle" }); // idle | loading | done | error
@@ -81,7 +81,7 @@ function Finding({ finding, scanId, open, onToggle, toast }) {
             <div className="explain stack-3">
               <div className="spread">
                 <span className="t-label-s">Explained for a Junior Dev</span>
-                <span className={`badge ${state.mode === "gemma" ? "badge-heat" : "badge-outline"}`}>{state.mode === "gemma" ? "Gemma 4" : "Template"}</span>
+                <span className={`badge ${state.mode === "fallback" ? "badge-outline" : "badge-heat"}`}>{AI_LABEL[state.mode] || "Template"}</span>
               </div>
               <Markdown>{state.text}</Markdown>
             </div>

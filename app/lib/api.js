@@ -55,42 +55,9 @@ export const scanGithub = (repo, branch) => post("/api/scan/github", branch ? { 
 export const scanUpload = (name, files) => post("/api/scan/upload", { name, files });
 export const getSummary = (scanId) => post("/api/summary", { scanId });
 export const explain = (scanId, findingId) => post("/api/explain", { scanId, findingId });
-export const recordProof = (scanId) => post(`/api/proofs/${scanId}`);
-export const verifyProof = (scanId) => request(`/api/proofs/${scanId}/verify`);
 export const getReport = (scanId) => request(`/api/reports/${scanId}`);
-export const registerAgent = async () => normalizeAgent(await post("/api/agent/register"));
 
 export async function listReports() {
   const data = await request("/api/reports");
   return Array.isArray(data) ? data : data?.reports || [];
-}
-
-// API.md does not pin down the exact field names for the agent endpoints,
-// so these tolerate the likely variants. Tighten once the backend is final.
-export function normalizeAgent(a) {
-  if (!a) return null;
-  return {
-    publicKey: a.publicKey || a.pubkey || a.agent || a.address || "",
-    balance: a.balance ?? a.sol ?? null,
-    mode: a.mode || "simulated",
-    registered: Boolean(a.registered ?? a.registrationSignature ?? a.registration?.signature ?? a.signature),
-    registrationSignature: a.registrationSignature || a.registration?.signature || a.signature || null,
-    explorerUrl: a.explorerUrl || a.registration?.explorerUrl || null,
-  };
-}
-
-export async function getAgent() {
-  return normalizeAgent(await request("/api/agent"));
-}
-
-export async function getHistory() {
-  const data = await request("/api/agent/history");
-  const rows = Array.isArray(data) ? data : data?.history || data?.records || data?.signatures || [];
-  return rows.map((r) => ({
-    signature: r.signature || r.sig || "",
-    memo: r.memo || null,
-    timestamp: r.timestamp || (r.blockTime ? new Date(r.blockTime * 1000).toISOString() : null),
-    explorerUrl: r.explorerUrl || null,
-    failed: Boolean(r.err),
-  }));
 }

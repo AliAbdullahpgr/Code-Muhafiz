@@ -1,8 +1,6 @@
 // Demo data used only when the backend (app/api/**) is not reachable.
 // It mirrors the "trap-app" scenario from plan/DEMO.md and the shapes in plan/DATA_MODEL.md.
 
-const AGENT = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU";
-const SIG = "5VERv8NMvzbJMEkV8xnrLkEaWRtSFPJTZ6Qv1ZkY2gZ9uQy3sDkX7mJ1bq4L8hT2cN6wRzP9eYf3aUoKxMdHnS4";
 const HASH = "9f2c1ad04b7e5d38c6a10f4e2b9d7a53e8c01b46f7d2a9e53c18b0a4d6e7f291";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -105,7 +103,6 @@ function makeReport(target, source = "upload") {
   return {
     scanId: id,
     createdAt: new Date().toISOString(),
-    agent: AGENT,
     source,
     target,
     stats: { files: 31, manifests: 4, dependencies: dependencies.length, direct: dependencies.filter((d) => d.direct).length, transitive: dependencies.filter((d) => !d.direct).length, ecosystems: { npm: 10, PyPI: 1 } },
@@ -120,7 +117,6 @@ function makeReport(target, source = "upload") {
     },
     warnings: ["Backend not connected. This is demo data, not a real scan."],
     reportHash: HASH,
-    proof: null,
   };
 }
 
@@ -134,22 +130,19 @@ function genericExplanation(f) {
   return `### What it is\n\n${f.description}\n\n### How to fix it\n\n${f.fix || "Review and remove the dependency."}\n\n### How to avoid it next time\n\nReview new dependencies before adding them, prefer well-known maintainers and install with \`--ignore-scripts\`.`;
 }
 
-let agentRegistered = false;
-
 export async function mockRequest(path, opts = {}) {
   const method = (opts.method || "GET").toUpperCase();
   const body = opts.body ? JSON.parse(opts.body) : {};
   await sleep(method === "GET" ? 250 : 900);
 
   if (path === "/api/health") {
-    return { ok: true, ai: "gemma-4-31b-it", aiEnabled: false, snowflake: false, solana: { mode: "simulated", agent: AGENT } };
+    return { ok: true, ai: "gemma-4-31b-it", aiEnabled: false, snowflake: false, anthropic: false };
   }
 
   if (path === "/api/scan/github" || path === "/api/scan/upload") {
     await sleep(2800);
     const target = path.endsWith("github") ? `${String(body.repo || "owner/repo").replace(/^https?:\/\/github\.com\//, "")}@${body.branch || "main"}` : `upload:${body.name || "project"}`;
     const report = makeReport(target, path.endsWith("github") ? "github" : "upload");
-    report.proof = makeProof(report);
     store.set(report.scanId, report);
     return report;
   }
@@ -176,48 +169,5 @@ export async function mockRequest(path, opts = {}) {
     return { explanation: explanations[body.findingId] || (f ? genericExplanation(f) : "### Demo explanation\n\n`/api/explain` is not live yet. When it is, Gemma 4 will explain this finding here."), mode: "fallback" };
   }
 
-  if ((m = path.match(/^\/api\/proofs\/([^/]+)\/verify$/))) {
-    const r = store.get(m[1]);
-    const proof = r?.proof;
-    return {
-      valid: true, mode: proof?.mode || "simulated",
-      checks: { hashMatches: true, signerIsAgent: true, onChain: proof?.mode === "devnet" },
-      reportHash: r?.reportHash || HASH,
-      onChainMemo: proof?.memo,
-      explorerUrl: proof?.explorerUrl,
-    };
-  }
-
-  if ((m = path.match(/^\/api\/proofs\/([^/]+)$/))) {
-    const r = store.get(m[1]) || { scanId: m[1], target: m[1], reportHash: HASH + m[1], summary: { level: "unknown", counts: {} } };
-    r.proof = makeProof(r);
-    return r.proof;
-  }
-
-  if (path === "/api/agent") {
-    return { publicKey: AGENT, balance: 0, mode: "simulated", registered: agentRegistered, registrationSignature: agentRegistered ? SIG : null };
-  }
-  if (path === "/api/agent/register") {
-    agentRegistered = true;
-    return { publicKey: AGENT, balance: 0, mode: "simulated", registered: true, registrationSignature: SIG };
-  }
-  if (path === "/api/agent/history") {
-    const rows = [...store.values()].reverse().map((r) => ({ signature: r.proof.signature, memo: r.proof.memo, timestamp: r.proof.timestamp }));
-    if (agentRegistered) rows.push({ signature: SIG, memo: '{"t":"agent_register","name":"code-muhafiz"}', timestamp: new Date().toISOString() });
-    return rows;
-  }
-
   throw Object.assign(new Error("Not found."), { status: 404 });
-}
-
-function makeProof(r) {
-  return {
-    mode: "simulated",
-    signature: SIG,
-    reportHash: r.reportHash,
-    agent: AGENT,
-    memo: JSON.stringify({ p: "code-muhafiz", v: 1, t: "audit", scan: r.scanId, target: r.target, h: r.reportHash, risk: r.summary.level, f: r.summary.counts }),
-    timestamp: new Date().toISOString(),
-    prevHash: null,
-  };
 }

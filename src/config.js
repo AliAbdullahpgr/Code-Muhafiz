@@ -10,5 +10,10 @@ export const config = {
     fallbackModel: env.GEMMA_FALLBACK_MODEL || 'gemma-4-26b-a4b-it',
     timeoutMs: Number(env.GEMMA_TIMEOUT_MS || 45000),
   },
+  anthropic: {
+    apiKey: env.ANTHROPIC_API_KEY && env.ANTHROPIC_API_KEY !== 'your-key-here' ? env.ANTHROPIC_API_KEY : '',
+    model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5',
+    timeoutMs: Number(env.ANTHROPIC_TIMEOUT_MS || 45000),
+  },
   githubToken: env.GITHUB_TOKEN || '',
 };

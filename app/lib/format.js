@@ -11,6 +11,8 @@ export const TYPE_LABEL = {
   "suspicious-code": "Suspicious Code",
 };
 
+export const AI_LABEL = { gemma: "Gemma 4", anthropic: "Claude", fallback: "Template" };
+
 export const SOURCE_LABEL = { osv: "OSV.dev", snowflake: "Snowflake", snapshot: "Local Snapshot", heuristic: "Heuristic" };
 
 export function formatDate(iso) {
@@ -40,12 +42,4 @@ export function formatBytes(n) {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
-}
-
-export function explorerTx(sig) {
-  return `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
-}
-
-export function explorerAddress(addr) {
-  return `https://explorer.solana.com/address/${addr}?cluster=devnet`;
 }

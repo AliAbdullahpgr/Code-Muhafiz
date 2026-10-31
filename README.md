@@ -21,13 +21,15 @@ for *Challenge 2: Open-Source "Dependency Trap" Code Guard*.
 3. **Gemma 4 explanation** — the `/api/scan` route sends all findings to `gemma-4-31b-it` via the Gemini
    API in **one** batched request, streamed to the page (a single call takes
    ~30 s, so results show instantly and the explanation streams in after).
-4. **Audit log** — every finding is written to a *simulated* Solana Agent
-   Registry audit log (agent identity + validation record) shown on the page.
+4. **Claude fallback** — if Gemma gives no answer, the same prompt goes to
+   Claude Sonnet 5.5 (`claude-sonnet-5-5`) via `@anthropic-ai/sdk`; if that fails too, a template text is used.
+5. **Report fingerprint** — each report carries a SHA-256 hash of its findings.
 
 ## Stack
 
 - Next.js 16 (App Router), React 19, Node.js 24
 - `@google/genai` — Gemma 4 (`gemma-4-31b-it`) through the Gemini API
+- `@anthropic-ai/sdk` — Claude Sonnet 5.5 fallback
 - Scan + Gemma call in an API route: `app/api/scan/route.js`
 
 ## Run

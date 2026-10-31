@@ -19,7 +19,7 @@ export function canonicalJson(value) {
 export function hashReport(report) {
   const core = {
     scanId: report.scanId, createdAt: report.createdAt, target: report.target,
-    agent: report.agent, summary: report.summary,
+    summary: report.summary,
     findings: report.findings.map((f) => ({
       type: f.type, severity: f.severity, package: f.package, version: f.version,
       ruleId: f.ruleId, file: f.file, line: f.line,
@@ -42,7 +42,6 @@ export async function scan(input, { offline = false, ai = true } = {}) {
   const report = {
     scanId: crypto.randomBytes(6).toString('hex'),
     createdAt: new Date().toISOString(),
-    agent: null,
     source: input.source,
     target: input.target,
     stats: {
@@ -59,7 +58,6 @@ export async function scan(input, { offline = false, ai = true } = {}) {
     ai: null,
     warnings,
     reportHash: null,
-    proof: null,
   };
 
   // AI text is excluded from the hash, so the summary can be filled in later (see addAiSummary).

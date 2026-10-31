@@ -29,28 +29,22 @@
 ## Report
 ```js
 {
-  scanId, createdAt, agent: '<pubkey>',
+  scanId, createdAt,
   source: 'github' | 'upload' | 'local',
   target: 'owner/repo@branch' | 'upload:name',
   stats: { files, manifests, dependencies, direct, transitive, ecosystems: {npm: n} },
   dependencies: Dependency[],
   findings: Finding[],
   summary: { score: 0-100, level, counts: { critical, high, medium, low } },
-  ai: { mode: 'gemma' | 'fallback', model, summary: 'markdown' },
+  ai: { mode: 'pending' | 'gemma' | 'anthropic' | 'fallback', model, summary: 'markdown' },
   warnings: [],
-  reportHash: 'sha256 hex',
-  proof: Proof | null
+  reportHash: 'sha256 hex'
 }
 ```
 
 `reportHash` = SHA-256 of canonical (sorted-keys) JSON of
-`{ scanId, createdAt, target, agent, summary, findings: [{type, severity, package, version, ruleId, file, line}] }`.
+`{ scanId, createdAt, target, summary, findings: [{type, severity, package, version, ruleId, file, line}] }`.
 AI text is excluded (non-deterministic).
-
-## Proof
-```js
-{ mode: 'devnet' | 'simulated', signature, reportHash, agent, memo, slot?, explorerUrl?, timestamp, prevHash? }
-```
 
 ## Snowflake: `CODE_MUHAFIZ.INTEL.COMPROMISED_PACKAGES`
 | Column | Type | Notes |

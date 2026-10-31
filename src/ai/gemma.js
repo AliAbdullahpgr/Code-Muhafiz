@@ -1,6 +1,7 @@
 // Gemma 4 (via @google/genai) — executive summaries + per-finding explanations for junior devs.
-// Fallback chain: config.gemini.model → config.gemini.fallbackModel → deterministic template.
+// Fallback chain: Gemma (model + fallbackModel, raced) → Anthropic Claude Sonnet 5.5 → deterministic template.
 import { GoogleGenAI } from '@google/genai';
+import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config.js';
 
 const SEVERITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
@@ -13,8 +14,21 @@ function getClient() {
   return client;
 }
 
+let anthropic = null;
+function getAnthropic() {
+  if (!anthropic) anthropic = new Anthropic({ apiKey: config.anthropic.apiKey });
+  return anthropic;
+}
+
 export function aiStatus() {
-  return { enabled: Boolean(config.gemini.apiKey), model: config.gemini.model };
+  const gemma = Boolean(config.gemini.apiKey);
+  const claude = Boolean(config.anthropic.apiKey);
+  return {
+    enabled: gemma || claude,
+    model: gemma ? config.gemini.model : claude ? config.anthropic.model : config.gemini.model,
+    anthropic: claude,
+    anthropicModel: config.anthropic.model,
+  };
 }
 
 // ---------- public API ----------
@@ -23,27 +37,32 @@ export async function summarizeReport(report) {
   const top = topFindings(report?.findings || []);
   const prompt = buildSummaryPrompt(report || {}, top);
   const ai = await generateWithFallback(prompt);
-  if (ai) return { mode: 'gemma', model: ai.model, summary: ai.text };
+  if (ai) return { mode: ai.provider, model: ai.model, summary: ai.text };
   return { mode: 'fallback', model: 'template', summary: templateSummary(report || {}, top) };
 }
 
 export async function explainFinding(finding) {
   const prompt = buildExplainPrompt(finding || {});
   const ai = await generateWithFallback(prompt);
-  if (ai) return { mode: 'gemma', model: ai.model, explanation: ai.text };
+  if (ai) return { mode: ai.provider, model: ai.model, explanation: ai.text };
   return { mode: 'fallback', model: 'template', explanation: templateExplanation(finding || {}) };
 }
 
 // ---------- model calls ----------
 
-// Both models race in parallel (Gemma is often overloaded); the first non-empty answer wins.
+// Gemma first; if it gives nothing (no key, overloaded, timeout) try Claude. null → caller uses the template.
 async function generateWithFallback(prompt) {
+  return (await generateWithGemma(prompt)) || (await generateWithClaude(prompt));
+}
+
+// Both Gemma models race in parallel (Gemma is often overloaded); the first non-empty answer wins.
+async function generateWithGemma(prompt) {
   if (!config.gemini.apiKey) return null;
   const models = [...new Set([config.gemini.model, config.gemini.fallbackModel].filter(Boolean))];
   const attempts = models.map(async (model) => {
     try {
       const text = await callModel(model, prompt);
-      if (text) return { model, text };
+      if (text) return { provider: 'gemma', model, text };
       console.warn(`[gemma] ${model} returned empty text`);
     } catch (err) {
       console.warn(`[gemma] ${model} failed: ${err?.message || err}`);
@@ -55,6 +74,23 @@ async function generateWithFallback(prompt) {
   } catch {
     return null;
   }
+}
+
+async function generateWithClaude(prompt) {
+  const { apiKey, model, timeoutMs } = config.anthropic;
+  if (!apiKey) return null;
+  try {
+    const message = await getAnthropic().messages.create(
+      { model, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] },
+      { timeout: timeoutMs, maxRetries: 1 },
+    );
+    const text = cleanText(message.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
+    if (text) return { provider: 'anthropic', model, text };
+    console.warn(`[anthropic] ${model} returned empty text`);
+  } catch (err) {
+    console.warn(`[anthropic] ${model} failed: ${err?.message || err}`);
+  }
+  return null;
 }
 
 async function callModel(model, prompt) {

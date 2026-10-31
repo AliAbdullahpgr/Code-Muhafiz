@@ -4,7 +4,7 @@ Base: `http://localhost:3000/api`. All bodies JSON.
 
 ## `GET /api/health`
 ```json
-{ "ok": true, "ai": "gemma-4-31b-it", "aiEnabled": true, "snowflake": false, "solana": { "mode": "devnet", "agent": "7xK..." } }
+{ "ok": true, "ai": "gemma-4-31b-it", "aiEnabled": true, "snowflake": false, "anthropic": true, "anthropicModel": "claude-sonnet-5-5" }
 ```
 
 ## `POST /api/scan/github`
@@ -26,25 +26,13 @@ List recent reports (summary) / full report.
 ```json
 { "scanId": "abc123", "findingId": "f-3" }
 ```
-→ `{ "explanation": "markdown...", "mode": "gemma" | "fallback" }`
+→ `{ "explanation": "markdown...", "mode": "gemma" | "anthropic" | "fallback" }`
 
-## `POST /api/proofs/:scanId`
-Record (or re-record) a Solana proof for a report. Returns **Proof**.
-
-## `GET /api/proofs/:scanId/verify`
+## `POST /api/summary`
 ```json
-{ "valid": true, "mode": "devnet", "checks": { "hashMatches": true, "signerIsAgent": true, "onChain": true },
-  "reportHash": "…", "onChainMemo": "{…}", "explorerUrl": "https://explorer.solana.com/tx/…?cluster=devnet" }
+{ "scanId": "abc123" }
 ```
-
-## `GET /api/agent`
-Agent identity: public key, balance, registration signature, mode.
-
-## `POST /api/agent/register`
-Writes the agent registration memo on-chain (once). Returns identity.
-
-## `GET /api/agent/history`
-Recent on-chain records signed by the agent (`getSignaturesForAddress`), i.e. its public reputation log.
+`/api/scan/*` returns findings first with `ai.mode = "pending"`; this call writes the AI summary → `{ "mode": "gemma" | "anthropic" | "fallback", "model": "…", "summary": "markdown…" }`.
 
 ## Errors
 `{ "error": "message" }` with 400 (bad input), 404, 502 (upstream), 500.

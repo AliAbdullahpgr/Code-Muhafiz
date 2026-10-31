@@ -6,7 +6,6 @@ import ScanForm from "./components/ScanForm";
 import ScanProgress from "./components/ScanProgress";
 import ReportView from "./components/ReportView";
 import ReportsList from "./components/ReportsList";
-import AgentPanel from "./components/AgentPanel";
 import AsciiFlame from "./components/AsciiFlame";
 import Toasts from "./components/Toasts";
 import { saveLocalReport, findLocalReport } from "./lib/history";
@@ -15,8 +14,8 @@ import { health as fetchHealth, scanGithub, scanUpload, getReport, getSummary, o
 const FEATURES = [
   ["Ingest", "Point it at a public repo or drop a folder. Lockfiles and node_modules give us the deep dependencies."],
   ["Detect", "OSV.dev, a Snowflake threat-intel table, typosquat checks, install scripts and suspicious code patterns."],
-  ["Explain", "Gemma 4 turns raw advisories and code lines into what, why and how to fix, written for a junior dev."],
-  ["Prove", "The report hash is signed by the agent and written to Solana, so any audit can be verified later."],
+  ["Explain", "Gemma 4 turns raw advisories and code lines into what, why and how to fix. Claude Sonnet 5.5 steps in if Gemma is down."],
+  ["Fingerprint", "Every report gets a SHA-256 hash of its findings, so you can tell if a saved result was changed."],
 ];
 
 export default function Home() {
@@ -123,7 +122,7 @@ export default function Home() {
                 <span className="eyebrow">Dependency Trap Guard</span>
                 <h1 className="t-h1">Gemma 4 reads your dependencies so you don’t have to</h1>
                 <p className="lede t-body-xl">
-                  Scan a repo for poisoned packages, get every risk explained in plain language, and stamp a tamper-proof audit on Solana.
+                  Scan a repo for poisoned packages, get every risk explained in plain language, and fingerprint every audit so it can be checked later.
                 </p>
                 {phase === "scanning" ? (
                   <ScanProgress target={target} />
@@ -153,8 +152,7 @@ export default function Home() {
             <ReportView
               key={report.scanId}
               report={report}
-              onReport={setReport}
-              onNewScan={() => goTo("scan", true)}
+                            onNewScan={() => goTo("scan", true)}
               onRetrySummary={() => loadSummary(report.scanId)}
               toast={toast}
             />
@@ -164,12 +162,6 @@ export default function Home() {
         {view === "reports" && (
           <section className="container section">
             <ReportsList onOpen={openReport} onNewScan={() => goTo("scan", true)} />
-          </section>
-        )}
-
-        {view === "agent" && (
-          <section className="container section">
-            <AgentPanel toast={toast} />
           </section>
         )}
 

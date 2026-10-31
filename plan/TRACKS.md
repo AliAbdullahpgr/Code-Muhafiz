@@ -18,10 +18,9 @@
 - `src/intel/snowflake.js` queries the table live via the SQL API (PAT auth);
   `data/compromised_packages.json` is the exported snapshot used offline. **Code reference = deliverable #2.**
 
-### Solana Agent Identity
-- Agent keypair = identity. `POST /api/agent/register` → registration memo on devnet.
-- Every scan → audit memo with report SHA-256 signed by the agent → **untamperable audit log**.
-- `GET /api/proofs/:id/verify` and `GET /api/agent/history` → **pulling verifiable reputation records**.
+### Anthropic Claude fallback
+- `src/ai/gemma.js` falls back to `claude-sonnet-5-5` via `@anthropic-ai/sdk` when Gemma gives no answer.
+- Chain: Gemma (two models raced) → Claude Sonnet 5.5 → template. The UI shows which one wrote the text.
 
 ### GitHub Copilot Acceleration
 - `test/fixtures/trap-app/` — mock repo with subtle flaws, written by prompting Copilot.
@@ -34,5 +33,4 @@
 |-------------|-------|
 | Public GitHub codebase, clean code, visible open-source license block | `LICENSE` (MIT) + "License" section at bottom of README |
 | Code referencing Snowflake datasets via CoCo | `src/intel/snowflake.js`, `snowflake/*.sql`, `snowflake/COCO_PROMPTS.md` |
-| Live/simulated demo of agent pulling reputation records / registering signatures on Solana | UI "Agent" panel + proof panel; `plan/DEMO.md` |
 | README: how Copilot helped with unfamiliar package parsing APIs | README → "How GitHub Copilot helped" |

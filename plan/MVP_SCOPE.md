@@ -14,9 +14,7 @@ Goal: **a working, demo-able prototype in one hackathon day.** Not hardened.
 - [x] Install-script and suspicious-code pattern detection
 - [x] Risk score
 - [x] Gemma 4 executive summary + per-finding "Explain like I'm a junior dev"
-- [x] Solana agent identity (keypair + registration memo)
-- [x] Solana audit proof per scan + verification + on-chain history
-- [x] Simulated mode for every external service
+- [x] Claude Sonnet 5.5 fallback when Gemma fails
 - [x] Test-suite with Copilot-generated "trap" fixtures
 - [x] README with license block + Copilot section
 
@@ -27,7 +25,6 @@ Goal: **a working, demo-able prototype in one hackathon day.** Not hardened.
 - Exact semver range resolution (we use the minimum version of a range when no lockfile)
 - Fetching & scanning tarballs of every transitive dependency from the registry
 - Auth, multi-tenant, rate limiting, queueing, DB
-- Custom Solana program (Anchor) — Memo program is enough for proofs
 - Mainnet
 
 ## Build checklist (order)
@@ -38,11 +35,11 @@ Goal: **a working, demo-able prototype in one hackathon day.** Not hardened.
 | 2 | Parsers + fixtures + tests | dev A | 1h |
 | 3 | Detectors (OSV, typosquat, patterns, threat intel) | dev A | 1.5h |
 | 4 | GitHub connector + upload ingest | dev B | 1h |
-| 5 | Solana base58/tx/rpc + agent + proofs | dev B | 1.5h |
+| 5 | Anthropic fallback + report hash | dev B | 0.5h |
 | 6 | Gemma integration | dev C | 0.5h |
 | 7 | UI | dev C | 1.5h |
 | 8 | Snowflake SQL + CoCo pipeline + client | dev C | 1h |
-| 9 | README, demo rehearsal, keygen + airdrop | all | 0.5h |
+| 9 | README, demo rehearsal | all | 0.5h |
 
 ## Definition of done
 
@@ -50,4 +47,4 @@ Goal: **a working, demo-able prototype in one hackathon day.** Not hardened.
 - Scanning `test/fixtures/trap-app` (upload) finds: OSV vulns in lodash, event-stream malicious,
   `crossenv` typosquat, postinstall `curl | sh`, `eval(Buffer.from(...))`, env exfiltration.
 - Scanning a real public GitHub repo works end-to-end.
-- Proof shows a devnet Explorer link and "Verified ✓".
+- If Gemma is unavailable the summary badge reads "Claude" (with `ANTHROPIC_API_KEY`) or "Template".

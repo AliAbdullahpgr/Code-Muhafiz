@@ -5,25 +5,25 @@ import { Logo, IconSun, IconMoon } from "./Icons";
 const VIEWS = [
   ["scan", "Scan"],
   ["reports", "Reports"],
-  ["agent", "Agent"],
 ];
 
 export function StatusPills({ health }) {
   if (!health) return null;
-  const solana = health.solana?.mode;
   return (
     <>
-      <span className="pill-status" data-state={health.aiEnabled ? "on" : "warn"} title={health.aiEnabled ? health.ai : "No GEMINI_API_KEY. Using template explanations"}>
+      <span className="pill-status" data-state={health.aiEnabled ? "on" : "warn"} title={health.aiEnabled ? health.ai : "No AI key set. Using template explanations"}>
         <span className="dot" />
         {health.aiEnabled ? "Gemma 4" : "Template AI"}
       </span>
+      {health.anthropic && (
+        <span className="pill-status" data-state="on" title={`Fallback when Gemma fails: ${health.anthropicModel}`}>
+          <span className="dot" />
+          Claude Fallback
+        </span>
+      )}
       <span className="pill-status" data-state={health.snowflake ? "on" : "warn"} title={health.snowflake ? "Live Snowflake threat intel" : "Using local snapshot"}>
         <span className="dot" />
         {health.snowflake ? "Snowflake" : "Snapshot Intel"}
-      </span>
-      <span className="pill-status" data-state={solana === "devnet" ? "on" : "warn"} title={solana === "devnet" ? "Proofs go to Solana devnet" : "Proofs are simulated in a local ledger"}>
-        <span className="dot" />
-        {solana === "devnet" ? "Solana Devnet" : "Simulated Proofs"}
       </span>
     </>
   );

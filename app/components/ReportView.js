@@ -3,11 +3,10 @@
 import { useState } from "react";
 import FindingsPanel from "./FindingsPanel";
 import DependenciesPanel from "./DependenciesPanel";
-import ProofPanel from "./ProofPanel";
 import Markdown from "./Markdown";
 import CopyButton from "./CopyButton";
 import { IconAlert, IconPlus } from "./Icons";
-import { SEV_LABEL, SEVERITIES, formatDate } from "../lib/format";
+import { SEV_LABEL, SEVERITIES, AI_LABEL, formatDate, shorten } from "../lib/format";
 
 const LEVEL_COLOR = {
   safe: "var(--accent-forest)",
@@ -98,7 +97,7 @@ function Stat({ label, value }) {
   );
 }
 
-export default function ReportView({ report, onReport, onNewScan, onRetrySummary, toast }) {
+export default function ReportView({ report, onNewScan, onRetrySummary, toast }) {
   const [tab, setTab] = useState("findings");
   const { stats = {}, ai, warnings = [] } = report;
   const ecosystems = Object.entries(stats.ecosystems || {}).map(([k, v]) => `${k} ${v}`).join(" · ");
@@ -106,7 +105,6 @@ export default function ReportView({ report, onReport, onNewScan, onRetrySummary
   const tabs = [
     ["findings", "Findings", report.findings.length],
     ["dependencies", "Dependencies", report.dependencies.length],
-    ["proof", "Proof", report.proof ? (report.proof.mode === "devnet" ? "Devnet" : "Simulated") : "None"],
   ];
 
   return (
@@ -121,6 +119,13 @@ export default function ReportView({ report, onReport, onNewScan, onRetrySummary
             <span className="mono">{report.scanId}</span>
             <CopyButton value={report.scanId} label="scan ID" onCopied={toast} />
           </p>
+          {report.reportHash && (
+            <p className="t-body-s muted row-wrap" style={{ marginTop: 4 }}>
+              <span>SHA-256</span>
+              <span className="mono" title={report.reportHash}>{shorten(report.reportHash, 12, 8)}</span>
+              <CopyButton value={report.reportHash} label="report hash" onCopied={toast} />
+            </p>
+          )}
         </div>
         <button type="button" className="btn btn-secondary" onClick={onNewScan}>
           <IconPlus size={14} /> New Scan
@@ -141,7 +146,7 @@ export default function ReportView({ report, onReport, onNewScan, onRetrySummary
         <div className="card">
           <div className="spread card-title">
             <p className="t-label-s muted">Summary</p>
-            {ai && (ai.mode === "gemma" || ai.mode === "fallback") && <span className={`badge ${ai.mode === "gemma" ? "badge-heat" : "badge-outline"}`}>{ai.mode === "gemma" ? `Gemma 4 · ${ai.model}` : "Template Summary"}</span>}
+            {ai && AI_LABEL[ai.mode] && <span className={`badge ${ai.mode === "fallback" ? "badge-outline" : "badge-heat"}`}>{ai.mode === "fallback" ? "Template Summary" : `${AI_LABEL[ai.mode]} · ${ai.model}`}</span>}
           </div>
           <Summary ai={ai} onRetry={onRetrySummary} />
         </div>
@@ -167,7 +172,6 @@ export default function ReportView({ report, onReport, onNewScan, onRetrySummary
         <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
           {tab === "findings" && <FindingsPanel report={report} toast={toast} />}
           {tab === "dependencies" && <DependenciesPanel report={report} />}
-          {tab === "proof" && <ProofPanel report={report} onReport={onReport} toast={toast} />}
         </div>
       </div>
     </div>
